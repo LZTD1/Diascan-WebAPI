@@ -10,12 +10,14 @@ namespace PokemonReviewApp.Controllers
     [ApiController]
     public class ReviewController : Controller
     {
+        private readonly IReviewerRepository _reviewerRepository;
         private readonly IReviewRepository _reviewRepository;
         private readonly IPokemonRepository _pokemonRepository;
         private readonly IMapper _mapper;
 
-        public ReviewController(IReviewRepository reviewRepository, IPokemonRepository pokemonRepository, IMapper mapper)
+        public ReviewController(IReviewerRepository reviewerRepository,IReviewRepository reviewRepository, IPokemonRepository pokemonRepository, IMapper mapper)
         {
+            _reviewerRepository = reviewerRepository;
             _reviewRepository = reviewRepository;
             _pokemonRepository = pokemonRepository;
             _mapper = mapper;
@@ -57,6 +59,31 @@ namespace PokemonReviewApp.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             return Ok(review);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateReview([FromQuery] int reviewerId, [FromQuery] int pokeId, [FromBody] ReviewDto reviewCreate)
+        {
+            if (reviewCreate == null)
+                return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var reviewMap = _mapper.Map<Review>(reviewCreate);
+               
+            reviewMap.Pokemon = _pokemonRepository.GetPokemon(pokeId);
+            reviewMap.Reviewer = _reviewerRepository.GetReviewer(reviewerId);
+
+
+            if (!_reviewRepository.CreateReview(reviewMap))
+            {
+                ModelState.AddModelError("", "Something went wrong while savin");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully created");
         }
     }
 }
