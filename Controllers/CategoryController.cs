@@ -10,11 +10,13 @@ namespace PokemonReviewApp.Controllers
     [ApiController]
     public class CategoryController : Controller
     {
+        private readonly IEntityRepository<Category> _entityRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
 
-        public CategoryController(ICategoryRepository categoryRepository, IMapper mapper)
+        public CategoryController(IEntityRepository<Category> entityRepository, ICategoryRepository categoryRepository, IMapper mapper)
         {
+            _entityRepository = entityRepository;
             _categoryRepository = categoryRepository;
             _mapper = mapper;
         }
@@ -76,7 +78,7 @@ namespace PokemonReviewApp.Controllers
 
             var categoryMap = _mapper.Map<Category>(categoryCreate);
 
-            if (!_categoryRepository.CreateCategory(categoryMap))
+            if (!_entityRepository.CreateEntity(categoryMap))
             {
                 ModelState.AddModelError("", "Something wrong!");
                 return StatusCode(500, ModelState);
@@ -103,7 +105,7 @@ namespace PokemonReviewApp.Controllers
 
             var categoryMap = _mapper.Map<Category>(updatedCategory);
 
-            if(!_categoryRepository.UpdateCategory(categoryMap))
+            if(!_entityRepository.UpdateEntity(categoryMap))
             {
                 ModelState.AddModelError("", "Something went wrong updating category");
                 
@@ -126,7 +128,7 @@ namespace PokemonReviewApp.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!_categoryRepository.DeleteCategory(categoryToDelete))
+            if (!_entityRepository.DeleteEntity(categoryToDelete))
             {
                 ModelState.AddModelError("", "Something went wrong!");
                 return StatusCode(500, ModelState);

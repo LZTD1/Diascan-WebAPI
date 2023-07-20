@@ -10,13 +10,15 @@ namespace PokemonReviewApp.Controllers
     [ApiController]
     public class ReviewController : Controller
     {
+        private readonly IEntityRepository<Review> _entityRepository;
         private readonly IReviewerRepository _reviewerRepository;
         private readonly IReviewRepository _reviewRepository;
         private readonly IPokemonRepository _pokemonRepository;
         private readonly IMapper _mapper;
 
-        public ReviewController(IReviewerRepository reviewerRepository,IReviewRepository reviewRepository, IPokemonRepository pokemonRepository, IMapper mapper)
+        public ReviewController(IEntityRepository<Review> entityRepository, IReviewerRepository reviewerRepository,IReviewRepository reviewRepository, IPokemonRepository pokemonRepository, IMapper mapper)
         {
+            _entityRepository = entityRepository;
             _reviewerRepository = reviewerRepository;
             _reviewRepository = reviewRepository;
             _pokemonRepository = pokemonRepository;
@@ -77,7 +79,7 @@ namespace PokemonReviewApp.Controllers
             reviewMap.Reviewer = _reviewerRepository.GetReviewer(reviewerId);
 
 
-            if (!_reviewRepository.CreateReview(reviewMap))
+            if (!_entityRepository.CreateEntity(reviewMap))
             {
                 ModelState.AddModelError("", "Something went wrong while savin");
                 return StatusCode(500, ModelState);
@@ -106,7 +108,7 @@ namespace PokemonReviewApp.Controllers
 
             var reviewMap = _mapper.Map<Review>(updatedReview);
 
-            if (!_reviewRepository.UpdateReview(reviewMap))
+            if (!_entityRepository.UpdateEntity(reviewMap))
             {
                 ModelState.AddModelError("", "Something went wrong updating review");
                 return StatusCode(500, ModelState);
@@ -129,7 +131,7 @@ namespace PokemonReviewApp.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!_reviewRepository.DeleteReview(reviewToDelete))
+            if (!_entityRepository.DeleteEntity(reviewToDelete))
             {
                 ModelState.AddModelError("", "Something went wrong!");
                 return StatusCode(500, ModelState);

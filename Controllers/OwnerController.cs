@@ -10,13 +10,15 @@ namespace PokemonReviewApp.Controllers
     [ApiController]
     public class OwnerController : Controller
     {
+        private readonly IEntityRepository<Owner> _entityRepository;
         private readonly ICountryRepository _countryRepository;
         private readonly IPokemonRepository _pokemonRepository;
         private readonly IOwnerRepository _ownerRepository;
         private readonly IMapper _mapper;
 
-        public OwnerController(ICountryRepository countryRepository,IPokemonRepository pokemonRepository,IOwnerRepository ownerRepository, IMapper mapper)
+        public OwnerController(IEntityRepository<Owner> entityRepository, ICountryRepository countryRepository,IPokemonRepository pokemonRepository,IOwnerRepository ownerRepository, IMapper mapper)
         {
+            _entityRepository = entityRepository;
             _countryRepository = countryRepository;
             _pokemonRepository = pokemonRepository;
             _ownerRepository = ownerRepository;
@@ -95,7 +97,7 @@ namespace PokemonReviewApp.Controllers
             var ownerMap = _mapper.Map<Owner>(ownerCreate);
             ownerMap.Country = _countryRepository.GetCountry(countryId);
 
-            if (!_ownerRepository.CreateOwner(ownerMap))
+            if (!_entityRepository.CreateEntity(ownerMap))
             {
                 ModelState.AddModelError("", "Something wrong!");
                 return StatusCode(500, ModelState);
@@ -123,7 +125,7 @@ namespace PokemonReviewApp.Controllers
 
             var ownerMap = _mapper.Map<Owner>(updatedOwner);
 
-            if (!_ownerRepository.UpdateOwner(ownerMap))
+            if (!_entityRepository.UpdateEntity(ownerMap))
             {
                 ModelState.AddModelError("", "Something went wrong updating owner");
                 return StatusCode(500, ModelState);
@@ -146,7 +148,7 @@ namespace PokemonReviewApp.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!_ownerRepository.DeleteOwner(ownerToDelete))
+            if (!_entityRepository.DeleteEntity(ownerToDelete))
             {
                 ModelState.AddModelError("", "Something went wrong!");
                 return StatusCode(500, ModelState);

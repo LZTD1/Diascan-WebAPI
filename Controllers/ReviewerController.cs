@@ -10,11 +10,13 @@ namespace PokemonReviewApp.Controllers
     [ApiController]
     public class ReviewerController : Controller
     {
+        private readonly IEntityRepository<Reviewer> _entityRepository;
         private readonly IReviewerRepository _reviewerRepository;
         private readonly IMapper _mapper;
 
-        public ReviewerController(IReviewerRepository reviewerRepository, IMapper mapper)
+        public ReviewerController(IEntityRepository<Reviewer> entityRepository, IReviewerRepository reviewerRepository, IMapper mapper)
         {
+            _entityRepository = entityRepository;
             _reviewerRepository = reviewerRepository;
             _mapper = mapper;
         }
@@ -70,7 +72,7 @@ namespace PokemonReviewApp.Controllers
 
             var reviewerMap = _mapper.Map<Reviewer>(reviewerCreate);
 
-            if (!_reviewerRepository.CreateReviewer(reviewerMap))
+            if (!_entityRepository.CreateEntity(reviewerMap))
             {
                 ModelState.AddModelError("", "Something went wrong while saving");
                 return StatusCode(500, ModelState);
@@ -99,7 +101,7 @@ namespace PokemonReviewApp.Controllers
              
             var reviewerMap = _mapper.Map<Reviewer>(updatedReviewer);
 
-            if (!_reviewerRepository.UpdateReviewer(reviewerMap))
+            if (!_entityRepository.UpdateEntity(reviewerMap))
             {
                 ModelState.AddModelError("", "Something went wrong updating reviewer");
                 return StatusCode(500, ModelState);
@@ -122,7 +124,7 @@ namespace PokemonReviewApp.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!_reviewerRepository.DeleteReviewer(reviewerToDelete))
+            if (!_entityRepository.DeleteEntity(reviewerToDelete))
             {
                 ModelState.AddModelError("", "Something went wrong!");
                 return StatusCode(500, ModelState);

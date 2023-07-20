@@ -11,11 +11,13 @@ namespace PokemonReviewApp.Controllers
     [ApiController]
     public class CountryController : Controller
     {
+        private readonly IEntityRepository<Country> _entityRepository;
         private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
 
-        public CountryController(ICountryRepository countryRepository, IMapper mapper)
+        public CountryController(IEntityRepository<Country> entityRepository, ICountryRepository countryRepository, IMapper mapper)
         {
+            _entityRepository = entityRepository;
             _countryRepository = countryRepository;
             _mapper = mapper;
         }
@@ -95,7 +97,7 @@ namespace PokemonReviewApp.Controllers
 
             var countryMap = _mapper.Map<Country>(countryCreate);
 
-            if (!_countryRepository.CreateCountry(countryMap))
+            if (!_entityRepository.CreateEntity(countryMap))
             {
                 ModelState.AddModelError("", "Something wrong!");
                 return StatusCode(500, ModelState);
@@ -123,7 +125,7 @@ namespace PokemonReviewApp.Controllers
 
             var countryMap = _mapper.Map<Country>(updatedCountry);
 
-            if (!_countryRepository.UpdateCountry(countryMap))
+            if (!_entityRepository.UpdateEntity(countryMap))
             {
                 ModelState.AddModelError("", "Something went wrong updating country");
                 return StatusCode(500, ModelState);
@@ -146,7 +148,7 @@ namespace PokemonReviewApp.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!_countryRepository.DeleteCountry(countryToDelete))
+            if (!_entityRepository.DeleteEntity(countryToDelete))
             {
                 ModelState.AddModelError("", "Something went wrong!");
                 return StatusCode(500, ModelState);

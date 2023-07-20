@@ -10,12 +10,16 @@ namespace PokemonReviewApp.Controllers
     [ApiController]
     public class PokemonController : Controller
     {
+        private readonly IEntityRepository<Pokemon> _entityRepository;
+        private readonly IEntityRepository<Review> _entityRepositoryReview;
         private readonly IReviewRepository _reviewRepository;
         private readonly IPokemonRepository _pokemonRepository;
         private readonly IMapper _mapper;
 
-        public PokemonController(IReviewRepository reviewRepository, IPokemonRepository pokemonRepository, IMapper mapper)
+        public PokemonController(IEntityRepository<Review> entityRepositoryReview, IEntityRepository<Pokemon> entityRepository, IReviewRepository reviewRepository, IPokemonRepository pokemonRepository, IMapper mapper)
         {
+            _entityRepository = entityRepository;
+            _entityRepositoryReview = entityRepositoryReview;
             _reviewRepository = reviewRepository;
             _pokemonRepository = pokemonRepository;
             _mapper = mapper;
@@ -110,7 +114,7 @@ namespace PokemonReviewApp.Controllers
 
             var pokemonMap = _mapper.Map<Pokemon>(updatedPokemon);
 
-            if (!_pokemonRepository.UpdatePokemon(pokemonMap))
+            if (!_entityRepository.UpdateEntity(pokemonMap))
             {
                 ModelState.AddModelError("", "Something went wrong updating pokemon");
                 return StatusCode(500, ModelState);
@@ -131,7 +135,7 @@ namespace PokemonReviewApp.Controllers
             var reviewsToDelete = _reviewRepository.GetReviewsOfAPokemon(pokemonId);
             var pokemonToDelete = _pokemonRepository.GetPokemon(pokemonId);
 
-            if (!_reviewRepository.DeleteReviews(reviewsToDelete.ToList()))
+            if (!_entityRepositoryReview.DeleteEntities(reviewsToDelete.ToList()))
             {
                 ModelState.AddModelError("", "Delete reviews of a pokemon error");
             }
@@ -139,7 +143,7 @@ namespace PokemonReviewApp.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!_pokemonRepository.DeletePokemon(pokemonToDelete))
+            if (!_entityRepository.DeleteEntity(pokemonToDelete))
             {
                 ModelState.AddModelError("", "Something went wrong!");
                 return StatusCode(500, ModelState);

@@ -8,10 +8,12 @@ namespace PokemonReviewApp.Repository
     public class PokemonRepository : IPokemonRepository
     {
         private readonly DataContext _context;
+        private readonly IEntityRepository<Pokemon> _entityRepository;
 
-        public PokemonRepository(DataContext context)
+        public PokemonRepository(DataContext context, IEntityRepository<Pokemon> entityRepository)
         {
             _context = context;
+            _entityRepository = entityRepository;
         }
 
         public Pokemon GetPokemon(int id)
@@ -48,12 +50,6 @@ namespace PokemonReviewApp.Repository
         {
             return _context.Pokemon.Any(p => p.Id == pokeId);
         }
-
-        public bool Save()
-        {
-            var saved = _context.SaveChanges();
-            return saved > 0 ? true : false;
-        }
         public bool CreatePokemon(int ownerId, int categoryId, Pokemon pokemon)
         {
             var pokemonOwnerEntity = _context.Owners.Where(a => a.Id == ownerId).FirstOrDefault();
@@ -77,19 +73,7 @@ namespace PokemonReviewApp.Repository
 
             _context.Add(pokemon);
 
-            return Save();
-        }
-
-        public bool UpdatePokemon(Pokemon pokemon)
-        {
-            _context.Update(pokemon);
-            return Save();
-        }
-
-        public bool DeletePokemon(Pokemon pokemon)
-        {
-            _context.Remove(pokemon);
-            return Save();
+            return _entityRepository.Save();
         }
     }
 }
